@@ -1,4 +1,4 @@
-# 🏠 PropToken – Real Estate Tokenization System  
+# PropToken – Real Estate Tokenization System  
 
 ## Overview  
 **PropToken** is a simplified MVP implementation of a real estate tokenization system. It demonstrates how a property deed (ERC-721) can be fractionalized into tradable ownership shares (ERC-20), and how a manager contract can orchestrate the entire lifecycle: minting, distribution, proceeds handling, and locking of the deed.  
@@ -103,7 +103,68 @@ The goal is to showcase **clean architecture**, **security best practices**, and
 
 ## 🔧 Development Guide  
 
-### 1. Install & Build  
+### 1. Install Dependencies & Build 
 ```bash
 npm install
 npx hardhat compile
+```
+
+### 2. Start Local Hardhat Node  
+```bash
+npx hardhat node
+```
+
+### 3. Deploy Contracts with Ignition 
+```bash
+npx hardhat ignition deploy ./ignition/modules/PropTokenModule.ts --network localhost
+```
+### Deployment address are stored under
+./ignition/deployments/chain-31337/deployed_addresses.json
+
+
+### 4. Run End-to-End Tests  
+```bash
+npx hardhat e2e-test --network localhost
+```
+
+## 🧪 Testing
+
+### Run all tests:
+```bash
+npx hardhat test
+```
+
+### Run a single test file:
+```bash
+npx hardhat test test/TokenizationManager.test.ts
+```
+
+### Run end-to-end flow test:
+```bash
+npx hardhat test test/TokenizationManager.e2e.test.ts
+```
+
+### Test Suite Structure
+
+- PropertyDeed.test.ts
+  - Validates deed minting
+  - Ensures only manager can mint
+  - Ensures URIs are correctly set
+
+- PropertyFractions.test.ts
+  - Validates initialization (name, symbol, supply)
+  - Ensures supply is assigned to manager
+  - Basic transfers between accounts
+
+- TokenizationManager.test.ts
+  - Unit + edge cases
+    - Tokenization, start distribution, buy fractions
+    - Withdraw proceeds, refunds, reverts on misuse
+    - Lifecycle transitions (pause/resume/close)
+    - Multi-property independence
+    - Global pause/unpause
+
+- TokenizationManager.e2e.test.ts
+  - Full flow integration test
+    - Tokenize property → Start → Multiple investors buy → Withdraw → Close → Ensure no further buys
+  - Proves system works correctly end-to-end across all contracts

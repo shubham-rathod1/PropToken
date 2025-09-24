@@ -7,6 +7,26 @@ The goal is to showcase **clean architecture**, **security best practices**, and
 
 ---
 
+## 🔧 Development Guide  
+
+### 1. Install Dependencies & Build 
+```bash
+npm install
+npx hardhat compile
+```
+
+### 2. Start Local Hardhat Node  
+```bash
+npx hardhat node
+```
+
+### 3. Deploy Contracts with Ignition 
+```bash
+npx hardhat ignition deploy ./ignition/modules/PropTokenModule.ts --network localhost
+```
+### Deployment address are stored under
+./ignition/deployments/chain-31337/deployed_addresses.json
+
 ## ⚙️ Architecture & Design Decisions  
 
 ### Contracts  
@@ -101,32 +121,6 @@ The goal is to showcase **clean architecture**, **security best practices**, and
 
 ---
 
-## 🔧 Development Guide  
-
-### 1. Install Dependencies & Build 
-```bash
-npm install
-npx hardhat compile
-```
-
-### 2. Start Local Hardhat Node  
-```bash
-npx hardhat node
-```
-
-### 3. Deploy Contracts with Ignition 
-```bash
-npx hardhat ignition deploy ./ignition/modules/PropTokenModule.ts --network localhost
-```
-### Deployment address are stored under
-./ignition/deployments/chain-31337/deployed_addresses.json
-
-
-### 4. Run End-to-End Tests  
-```bash
-npx hardhat e2e-test --network localhost
-```
-
 ## 🧪 Testing
 
 ### Run all tests:
@@ -168,3 +162,31 @@ npx hardhat test test/TokenizationManager.e2e.test.ts
   - Full flow integration test
     - Tokenize property → Start → Multiple investors buy → Withdraw → Close → Ensure no further buys
   - Proves system works correctly end-to-end across all contracts
+
+
+## Future Extensions  
+
+This MVP focuses on the core flow, but the system can be extended in multiple directions:  
+
+### 1. Modular Plug-and-Play Architecture  
+- Allow the `TokenizationManager` to plug in different `PropertyDeed` or `PropertyFractions` implementations.  
+- Example: upgrade to **ERC-721A** for cheaper minting, or integrate **ERC-4626 vault shares** for more complex fund structures.  
+- Would make the system more **extensible** without redeploying the manager.  
+
+### 2. Owner Fee Structure  
+- Introduce a configurable **platform fee** or **owner fee** on each withdrawal.  
+- Example: 1–2% of proceeds routed to a **treasury address**.  
+- Creates a **sustainable business model** for the platform.  
+
+### 3. Fraction Buyback / Redemption  
+- Add the ability for a property owner (or DAO) to **buy back fractions**.  
+- If all fractions are returned and burned, the **deed NFT could be unlocked** and transferred back.  
+- Mirrors real-world fund redemption but adds complexity.  
+
+### 4. Secondary Market Integration  
+- Integrate with existing **DEXs/AMMs** so fractions can be traded freely after the initial distribution.  
+- This would unlock **liquidity** and enable **price discovery** for property shares.  
+
+### 5. DAO Governance  
+- Allow fraction holders to **vote on property management** (e.g., maintenance, sale decisions).  
+- Turn the system into a **decentralized property fund**.  

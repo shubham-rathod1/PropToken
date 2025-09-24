@@ -63,6 +63,10 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
     event DistributionResumed(uint256 indexed propertyId);
     event DistributionClosed(uint256 indexed propertyId);
 
+    /**
+     * @param _deed Address of the deployed PropertyDeed contract
+     * @param _fractionsImp Address of the PropertyFractions implementation (used for cloning)
+     */
     constructor(address _deed, address _fractionsImp) Ownable(msg.sender) {
         require(
             _deed != address(0) && _fractionsImp != address(0),
@@ -90,6 +94,17 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
     }
 
     // ---------- core flow ----------
+
+    /**
+     * @notice Tokenizes a new property
+     * @dev Mints a new deed NFT to manager, deploys fractions via clone,
+     *      registers property, and locks deed in contract
+     * @param _uri Metadata URI for the deed NFT
+     * @param _name ERC-20 name for the fractions
+     * @param _symbol ERC-20 symbol for the fractions
+     * @param _totalSupply Total supply of fractions to mint
+     */
+
     function tokenizeProperty(
         string calldata _uri,
         string calldata _name,
@@ -119,6 +134,13 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         emit PropertyTokenized(propertyCount, msg.sender, clone, _totalSupply);
     }
 
+    /**
+     * @notice Start distribution for a property
+     * @dev Sets price per fraction and changes state to Active
+     * @param _propertyId Property to start selling
+     * @param _pricePerFraction Fraction price in wei
+     */
+
     function startDistribution(
         uint256 _propertyId,
         uint128 _pricePerFraction
@@ -134,6 +156,12 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         emit DistributionStarted(_propertyId, _pricePerFraction);
     }
 
+    /**
+     * @notice Buy fractions of a property with ETH
+     * @dev Refunds excess ETH and updates proceeds/remaining fractions
+     * @param _propertyId Property ID to buy fractions from
+     * @param _amount Number of fractions to buy
+     */
     function buyFractions(
         uint256 _propertyId,
         uint128 _amount
@@ -152,8 +180,6 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         );
 
         IERC20 fractions = IERC20(p.fractions);
-        // uint256 balance = fractions.balanceOf(address(this));
-        // require(balance >= _amount, "insufficient balance");
         p.proceeds += cost;
 
         unchecked {
@@ -169,6 +195,12 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         emit FractionsPurchased(_propertyId, msg.sender, _amount, cost);
     }
 
+
+/**
+     * @notice Withdraw proceeds from fraction sales
+     * @dev Only original property owner can call. Proceeds reset after withdrawal.
+     * @param _propertyId Property ID to withdraw proceeds from
+     */
     function withdrawProceeds(
         uint256 _propertyId
     ) external whenNotPaused nonReentrant onlyPropertyOwner(_propertyId) {
@@ -187,10 +219,7 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         uint256 propertyId
     ) external whenNotPaused onlyPropertyOwner(propertyId) {
         Property storage p = properties[propertyId];
-        require(
-            p.distributionState == DistributionState.Active,
-            "Inactive"
-        );
+        require(p.distributionState == DistributionState.Active, "Inactive");
 
         p.distributionState = DistributionState.Paused;
         emit DistributionPaused(propertyId);
@@ -200,10 +229,7 @@ contract TokenizationManager is Ownable, ReentrancyGuard, Pausable {
         uint256 propertyId
     ) external whenNotPaused onlyPropertyOwner(propertyId) {
         Property storage p = properties[propertyId];
-        require(
-            p.distributionState == DistributionState.Paused,
-            "Not paused"
-        );
+        require(p.distributionState == DistributionState.Paused, "Not paused");
 
         p.distributionState = DistributionState.Active;
         emit DistributionResumed(propertyId);

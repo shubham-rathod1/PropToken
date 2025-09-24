@@ -24,6 +24,12 @@ npx hardhat node
 ```bash
 npx hardhat ignition deploy ./ignition/modules/PropTokenModule.ts --network localhost
 ```
+
+### 4. Run test flow
+```bash
+npx hardhat run scripts/testFlow.ts --network localhost
+```
+
 ### Deployment address are stored under
 ./ignition/deployments/chain-31337/deployed_addresses.json
 

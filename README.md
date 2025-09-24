@@ -25,7 +25,7 @@ npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/PropTokenModule.ts --network localhost
 ```
 
-### 4. Run test flow
+### 4. Run dummy flow on hardhat local node
 ```bash
 npx hardhat run scripts/testFlow.ts --network localhost
 ```
